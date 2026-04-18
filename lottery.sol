@@ -30,23 +30,13 @@ contract SimpleLottery {
         return (s_started);
     }
 
-    // Use it to help your friend receive their lottery prizes!
-    function ReleaseRewards(address _addr) public {
-        uint256 i_ = rewards[_addr];
-        require(i_ > 0, "No rewards");
-        rewards[_addr] = 0;
-        (bool sent, bytes memory data) = _addr.call{value: i_}("");
-        require(sent, "Failed to send Ether");
-    }
-
-    function BuyTicket() public payable returns (bool) {
+    function BuyTicket() public payable returns (bool, uint256) {
         require(started == true, "Not started yet");
         require(msg.value == 0.01 ether, "Send 0.01 ETH to buy ticket");
-        address addr_ = msg.sender;
-        // update tickets mapping
-        // update ticket nonce
+        s_mapping_tickets[s_ticket_nonce] = msg.sender;
+        s_ticket_nonce ++;
         bool ticket_bought = true;
-        return (ticket_bought);
+        return (ticket_bought, s_ticket_nonce);
     }
 
     function ChooseRandomWinner(uint256 _id_nonce) internal {
