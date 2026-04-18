@@ -42,7 +42,7 @@ contract SimpleLottery {
     }
 
     function ChooseRandomWinner(uint256 _id_nonce) internal {
-        finished = true;
+        s_finished = true;
         // choose random wallet on specific id_nonce. Chainlink Oracle.
         // update user balance = lottery sum
         // update lottery balance = 0
@@ -58,16 +58,16 @@ contract SimpleLottery {
     function ReleaseComissions() public Owner {
         require(s_commissions > 0, "No comissions");
         s_commissions = 0;
-        (bool sent, bytes memory data) = owner.call{value: s_commissions}("");
+        (bool sent, bytes memory data) = s_owner.call{value: s_commissions}("");
         require(sent, "Failed to send Ether");
     }
 
     function ChangeOnwer(address _new_owner) public Owner {
-        owner = _new_owner;
+        s_owner = _new_owner;
     }
 
     modifier Owner() {
-        require(msg.sender == owner, "Not owner");
+        require(msg.sender == s_owner, "Not owner");
         _;
     }
 }
