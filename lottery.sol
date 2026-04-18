@@ -40,19 +40,18 @@ contract SimpleLottery {
         return (ticket_bought, s_ticket_nonce);
     }
 
-    function ChooseRandomWinner(uint256 _id_nonce) internal {
-        s_finished = true;
-        // choose random wallet on specific id_nonce. Chainlink Oracle.
-        // update user balance = lottery sum
-        // update lottery balance = 0
+    function RequestRandomWinner() public returns (uint256, address) {
+        require(s_finished = true, "Not finished yet");
+        uint256 winner_ticket_ = 1; // here we need to implement chainlink call
+        s_winner = s_mapping_tickets[winner_ticket_];
+        return (winner_ticket_, s_winner);
     }
 
     // Use it to help your friend receive their lottery prizes!
     function ReleaseRewards() public {
-        require(s_rewards > 0, "No rewards");
+        require(s_rewards_released == false, "No rewards");
         (bool sent, bytes memory data) = s_winner.call{value: s_rewards}("");
         require(sent, "Failed to send Ether");
-        s_rewards_released = true;
     }
 
     function ReleaseComissions() public Owner {
