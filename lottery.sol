@@ -10,7 +10,9 @@ contract SimpleLottery {
     mapping(uint256 => address) s_mapping_tickets;
 
     // stores the amount of unreleeased owners commisions
-    uint256 public s_commisions;
+    uint256 public s_commissions;
+
+        uint256 public s_rewards;
 
     // contract owner, the one to take comissions
     address public s_owner;
@@ -48,10 +50,8 @@ contract SimpleLottery {
 
     // Use it to help your friend receive their lottery prizes!
     function ReleaseRewards() public {
-        uint256 i_ = rewards;
-        require(i_ > 0, "No rewards");
-        _addr = s_winner;
-        (bool sent, bytes memory data) = _addr.call{value: i_}("");
+        require(s_rewards > 0, "No rewards");
+        (bool sent, bytes memory data) = s_winner.call{value: s_rewards}("");
         require(sent, "Failed to send Ether");
     }
 
