@@ -1,39 +1,32 @@
 contract SimpleLottery {
-    address public admin;
-    string public name;
-    string public description;
-    uint256 public amount_of_tickets;
-    uint256 public max_amount;
-    bool public started;
-    bool public finished;
-    address public winner;
-    uint256 public ticket_nonce;
+    string public s_name;
+    uint256 public s_max_amount;
+    bool public s_started;
+    bool public s_finished;
+    address public s_winner;
+    uint256 public s_ticket_nonce;
 
     // stores the data about all tickets bought.
-    mapping(uint256 => address) tickets;
+    mapping(uint256 => address) s_mapping_tickets;
 
     // stores the amount of unreleeased owners commisions
-    uint256 public commisions;
+    uint256 public s_commisions;
 
     // contract owner, the one to take comissions
-    address public owner;
+    address public s_owner;
 
     // let anyone create a new Lottery.
     // it does not run the lottery immediatelly to prevent front-running.
     function CreateAndStartLottery(
-        uint256 _id_nonce,
         string memory _name,
-        uint256 _max_amount,
-        uint256 _amount_of_tickets,
-        string memory _description
+        uint256 _max_amount
     ) public payable Owner returns (bool) {
-        require(started == false, "Already started");
+        require(s_started == false, "Already started");
         require(msg.value == 0.01 ether, "Send 0.01 ETH to buy ticket");
-        name = _name;
-        max_amount = _max_amount;
-        amount_of_tickets = 0;
-        description = _description;
-        started = true;
+        s_name = _name;
+        s_max_amount = _max_amount;
+        s_ticket_nonce = 0;
+        s_started = true;
         // return bool to confirm everything is succeesfull
     }
 
@@ -67,16 +60,15 @@ contract SimpleLottery {
     function ReleaseRewards() public {
         uint256 i_ = rewards;
         require(i_ > 0, "No rewards");
-        _addr = winner;
+        _addr = s_winner;
         (bool sent, bytes memory data) = _addr.call{value: i_}("");
         require(sent, "Failed to send Ether");
     }
 
     function ReleaseComissions() public Owner {
-        uint256 i_ = commisions;
-        require(i_ > 0, "No comissions");
-        commisions = 0;
-        (bool sent, bytes memory data) = owner.call{value: i_}("");
+        require(s_commissions > 0, "No comissions");
+        s_commissions = 0;
+        (bool sent, bytes memory data) = owner.call{value: s_commissions}("");
         require(sent, "Failed to send Ether");
     }
 
