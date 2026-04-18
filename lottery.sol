@@ -31,7 +31,7 @@ contract SimpleLottery {
     }
 
     function BuyTicket() public payable returns (bool, uint256) {
-        require(started == true, "Not started yet");
+        require(s_started == true, "Not started yet");
         require(msg.value == 0.01 ether, "Send 0.01 ETH to buy ticket");
         s_mapping_tickets[s_ticket_nonce] = msg.sender;
         s_ticket_nonce ++;
