@@ -27,7 +27,7 @@ contract SimpleLottery {
         s_max_amount = _max_amount;
         s_ticket_nonce = 0;
         s_started = true;
-        // return bool to confirm everything is succeesfull
+        return (s_started);
     }
 
     // Use it to help your friend receive their lottery prizes!
