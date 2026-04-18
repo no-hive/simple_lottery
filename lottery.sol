@@ -2,6 +2,7 @@ contract SimpleLottery {
     string public s_name;
     uint256 public s_max_amount;
     bool public s_started;
+    bool public s_rewards_released = true;
     bool public s_finished;
     address public s_winner;
     uint256 public s_ticket_nonce;
@@ -53,12 +54,12 @@ contract SimpleLottery {
         require(s_rewards > 0, "No rewards");
         (bool sent, bytes memory data) = s_winner.call{value: s_rewards}("");
         require(sent, "Failed to send Ether");
+        s_rewards_released = true;
     }
 
     function ReleaseComissions() public Owner {
-        require(s_commissions > 0, "No comissions");
-        s_commissions = 0;
-        (bool sent, bytes memory data) = s_owner.call{value: s_commissions}("");
+        require(s_rewards_released = true, "Release rewards first");
+        (bool sent, bytes memory data) = s_owner.call{value: address(this).balance}("");
         require(sent, "Failed to send Ether");
     }
 
