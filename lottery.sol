@@ -2,18 +2,15 @@ contract SimpleLottery {
     string public s_name;
     uint256 public s_max_amount;
     bool public s_started;
-    bool public s_rewards_released = true;
+    bool public s_rewards_released;
     bool public s_finished;
     address public s_winner;
     uint256 public s_ticket_nonce;
 
-    // stores the data about all tickets bought.
+    // stores the data about all tickets boughst.
     mapping(uint256 => address) s_mapping_tickets;
 
-    // stores the amount of unreleeased owners commisions
-    uint256 public s_commissions;
-
-        uint256 public s_rewards;
+    uint256 public s_rewards;
 
     // contract owner, the one to take comissions
     address public s_owner;
@@ -37,7 +34,8 @@ contract SimpleLottery {
         require(s_started == true, "Not started yet");
         require(msg.value == 0.01 ether, "Send 0.01 ETH to buy ticket");
         s_mapping_tickets[s_ticket_nonce] = msg.sender;
-        s_ticket_nonce ++;
+        s_ticket_nonce++;
+        s_rewards += 0.01 ether;
         bool ticket_bought = true;
         return (ticket_bought, s_ticket_nonce);
     }
@@ -59,7 +57,9 @@ contract SimpleLottery {
 
     function ReleaseComissions() public Owner {
         require(s_rewards_released = true, "Release rewards first");
-        (bool sent, bytes memory data) = s_owner.call{value: address(this).balance}("");
+        (bool sent, bytes memory data) = s_owner.call{
+            value: address(this).balance
+        }("");
         require(sent, "Failed to send Ether");
     }
 
