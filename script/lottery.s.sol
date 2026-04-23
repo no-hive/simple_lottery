@@ -29,13 +29,23 @@ contract LotteryScript is Script {
             _WEIPERUNITLINK
         );
 
-        address VRFCoordinatorV2_5Mock_address = address(vRFCoordinatorV2_5Mock);
+        address VRFCoordinatorV2_5Mock_address = address(
+            vRFCoordinatorV2_5Mock
+        );
 
-        simpleLottery = new SimpleLottery(1,VRFCoordinatorV2_5Mock_address,KEYHASH);
+        uint256 _subid = vRFCoordinatorV2_5Mock.createSubscription();
 
-        // SimpleLottery_address =
+        vRFCoordinatorV2_5Mock.fundSubscription(_subid, 100000000000000000000);
 
-        // VRFCoordinatorV2_5Mock.addConsumer (_subid, SimpleLottery_address);
+        simpleLottery = new SimpleLottery(
+            _subid,
+            VRFCoordinatorV2_5Mock_address,
+            KEYHASH
+        );
+
+        address SimpleLottery_address = address(simpleLottery);
+
+        vRFCoordinatorV2_5Mock.addConsumer(_subid, SimpleLottery_address);
 
         vm.stopBroadcast();
     }
