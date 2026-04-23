@@ -27,6 +27,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         uint256 _maxAmount
     ) public payable onlyOwner returns (bool) {
         require(lotStarted == false, "Already started");
+        require (_maxAmount < 10000);
         require(msg.value == 0.01 ether, "Send 0.01 ETH to buy ticket");
         lotName = _name;
         lotMaxAmount = _maxAmount;
@@ -48,9 +49,17 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     function requestRandomWinner() public returns (uint256, address) {
         require(lotFinished = true, "Not finished yet");
         uint256 winnerTicket_ = 1; // here we need to implement chainlink call
+        // calls requestRandomWords() 
+        // then we need to break this function down to two separate functions
         lotWinner = lotTicketsMapping[winnerTicket_];
         return (winnerTicket_, lotWinner);
     }
+
+// function revealRandomWinner
+// if ticket nonce > 9 then result - random % 0000
+// if ticket nonce > 99 then result - random % 000
+//if ticket nonce > 999 then result - random % 00
+// else ticket nonce then result - random % 0
 
     // Use it to help your friend receive their lottery prizes!
     function releaseRewards() public {
@@ -84,9 +93,9 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // The default is 3, but you can set this higher.
     uint16 constant REQUEST_CONFIRMATIONS = 3;
 
-    // For this example, retrieve 2 random values in one request.
+    // For this example, retrieve 1 random values in one request.
     // Cannot exceed VRFCoordinatorV2_5.MAX_NUM_WORDS.
-    uint32 constant NUM_WORDS = 2;
+    uint32 constant NUM_WORDS = 1;
 
     uint256[] public s_randomWords;
     uint256 public s_requestId;
@@ -113,7 +122,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
      * @notice Requests randomness
      * Assumes the subscription is funded sufficiently; "Words" refers to unit of data in Computer Science
      */
-    function requestRandomWords() external onlyOwner {
+    function requestRandomWords() external {
         // Will revert if subscription is not set and funded.
         s_requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
