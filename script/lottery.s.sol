@@ -5,18 +5,18 @@ pragma solidity ^0.8.4;
 
 import {Script} from "forge-std/Script.sol";
 import {SimpleLottery} from "../src/lottery.sol";
-import "lib/chainlink-evm/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
+import {VRFCoordinatorV2_5Mock} from "lib/chainlink-evm/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
 
 contract LotteryScript is Script {
     SimpleLottery public simpleLottery;
     VRFCoordinatorV2_5Mock public vRFCoordinatorV2_5Mock;
 
-    bytes32 KEYHASH =
+    bytes32 immutable KEYHASH =
         0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae;
 
-    uint96 _BASEFEE = 100000000000000000;
-    uint96 _GASPRICELINK = 1000000000;
-    int256 _WEIPERUNITLINK = 3984445400000000;
+    uint96 immutable _BASEFEE = 100000000000000000;
+    uint96 immutable _GASPRICELINK = 1000000000;
+    int256 immutable _WEIPERUNITLINK = 3984445400000000;
 
     function setUp() public {}
 
