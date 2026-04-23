@@ -29,9 +29,9 @@ contract LotteryScript is Script {
             _WEIPERUNITLINK
         );
 
-        // VRFCoordinatorV2_5Mock_address =
+        address VRFCoordinatorV2_5Mock_address = address(vRFCoordinatorV2_5Mock);
 
-        // simpleLottery = new SimpleLottery(1,RFCoordinatorV2_5Mock_address,KEYHASH);
+        simpleLottery = new SimpleLottery(1,VRFCoordinatorV2_5Mock_address,KEYHASH);
 
         // SimpleLottery_address =
 
