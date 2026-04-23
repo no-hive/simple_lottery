@@ -27,7 +27,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         uint256 _maxAmount
     ) public payable onlyOwner returns (bool) {
         require(lotStarted == false, "Already started");
-        require (_maxAmount < 10000);
+        require(_maxAmount < 10000);
         require(msg.value == 0.01 ether, "Send 0.01 ETH to buy ticket");
         lotName = _name;
         lotMaxAmount = _maxAmount;
@@ -49,17 +49,17 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     function requestRandomWinner() public returns (uint256, address) {
         require(lotFinished = true, "Not finished yet");
         uint256 winnerTicket_ = 1; // here we need to implement chainlink call
-        // calls requestRandomWords() 
+        // calls requestRandomWords()
         // then we need to break this function down to two separate functions
         lotWinner = lotTicketsMapping[winnerTicket_];
         return (winnerTicket_, lotWinner);
     }
 
-// function revealRandomWinner
-// if ticket nonce > 9 then result - random % 0000
-// if ticket nonce > 99 then result - random % 000
-//if ticket nonce > 999 then result - random % 00
-// else ticket nonce then result - random % 0
+    // function revealRandomWinner
+    // if ticket nonce > 9 then result - random % 0000
+    // if ticket nonce > 99 then result - random % 000
+    //if ticket nonce > 999 then result - random % 00
+    // else ticket nonce then result - random % 0
 
     // Use it to help your friend receive their lottery prizes!
     function releaseRewards() public {
