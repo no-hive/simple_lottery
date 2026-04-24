@@ -25,6 +25,10 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // @dev Updated in ___ function
     bool public lotRandomWordsRequestMade;
 
+    // @notice Indicates whether Chainlink oracle has sent the random words back
+    // @dev Updated in __ function
+    bool public lotRandomWordsRecieved;
+
     // @notice Indicates whether rewards were already released
     // @dev Updated in ___ function
     bool public lotRewardsReleased;
@@ -183,5 +187,6 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     {
         s_randomWords = randomWords;
         emit ReturnedRandomness(randomWords);
+        lotRandomWordsRecieved = true;
     }
 }
