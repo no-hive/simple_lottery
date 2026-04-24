@@ -82,11 +82,6 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         return (ticketBought_, lotNonce);
     }
 
-    function requestRandomWinner() public {
-        require(lotFinished = true, "Not finished yet");
-        requestRandomWords();
-    }
-
     function revealRandomWinner() public returns (uint256, address) {
         uint256 result_;
         if (lotNonce > 9) result_ = s_randomWords % 10;
@@ -115,6 +110,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
      * Assumes the subscription is funded sufficiently; "Words" refers to unit of data in Computer Science
      */
     function requestRandomWords() external {
+        require(lotFinished = true, "Not finished yet");
         require(lotRandomWordsRequestMade = false, "Already requested");
         // Will revert if subscription is not set and funded.
         s_requestId = s_vrfCoordinator.requestRandomWords(
