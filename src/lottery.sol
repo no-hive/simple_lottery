@@ -21,7 +21,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // contract owner, the one to take comissions
     address public lotAdmin;
 
-        // Your subscription ID.
+    // Your subscription ID.
     uint256 immutable s_subscriptionId;
 
     // The gas lane to use, which specifies the maximum gas price to bump to.
@@ -39,7 +39,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // Cannot exceed VRFCoordinatorV2_5.MAX_NUM_WORDS.
     uint32 constant NUM_WORDS = 1;
 
-//latest random word
+    //latest random word
     uint256[] public s_randomWords;
 
     // latest request ID
@@ -54,21 +54,14 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
      * @param vrfCoordinator - coordinator, check https://docs.chain.link/vrf/v2-5/supported-networks
      * @param keyHash - the gas lane to use, which specifies the maximum gas price to bump to
      */
-    constructor(
-        uint256 subscriptionId,
-        address vrfCoordinator,
-        bytes32 keyHash
-    ) VRFConsumerBaseV2Plus(vrfCoordinator) {
+    constructor(uint256 subscriptionId, address vrfCoordinator, bytes32 keyHash) VRFConsumerBaseV2Plus(vrfCoordinator) {
         s_keyHash = keyHash;
         s_subscriptionId = subscriptionId;
     }
 
     // let anyone create a new Lottery.
     // it does not run the lottery immediatelly to prevent front-running.
-    function createAndStartLottery(
-        string memory _name,
-        uint256 _maxAmount
-    ) public payable onlyOwner returns (bool) {
+    function createAndStartLottery(string memory _name, uint256 _maxAmount) public payable onlyOwner returns (bool) {
         require(lotStarted == false, "Already started");
         require(_maxAmount < 10000);
         require(msg.value == 0.01 ether, "Send 0.01 ETH to buy ticket");
@@ -89,30 +82,31 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         return (ticketBought_, lotNonce);
     }
 
-    function requestRandomWinner() public  {
+    function requestRandomWinner() public {
         require(lotFinished = true, "Not finished yet");
-    requestRandomWords();
+        requestRandomWords();
     }
 
-    function revealRandomWinner () public returns (uint256, address) {
-    if (lotNonce > 9) { result_ =  s_randomWords % 10 };
-    else if  (lotNonce > 99) { then result_ =  s_randomWords % 100 };
-    else if  (lotNonce > 999) { then result_ =  s_randomWords % 1000 };
-    else  { result_ =  s_randomWords % 10000 };
-    lotWinner = lotTicketsMapping[result_];
-    return (result_, lotWinner);
+    function revealRandomWinner() public returns (uint256, address) {
+        uint256 result_;
+        if (lotNonce > 9) result_ = s_randomWords % 10;
+        else if (lotNonce > 99) result_ = s_randomWords % 100;
+        else if (lotNonce > 999) result_ = s_randomWords % 1000;
+        else result_ = s_randomWords % 10000;
+        lotWinner = lotTicketsMapping[result_];
+        return (result_, lotWinner);
     }
 
     // Use it to help your friend receive their lottery prizes!
     function releaseRewards() public {
         require(lotRewardsReleased == false, "No rewards");
-        (bool sent, ) = lotWinner.call{value: lotRewards}("");
+        (bool sent,) = lotWinner.call{value: lotRewards}("");
         require(sent, "Failed to send Ether");
     }
 
     function releaseComissions() public onlyOwner {
         require(lotRewardsReleased = true, "Release rewards first");
-        (bool sent, ) = lotAdmin.call{value: address(this).balance}("");
+        (bool sent,) = lotAdmin.call{value: address(this).balance}("");
         require(sent, "Failed to send Ether");
     }
 
@@ -130,9 +124,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
                 requestConfirmations: REQUEST_CONFIRMATIONS,
                 callbackGasLimit: CALLBACK_GAS_LIMIT,
                 numWords: NUM_WORDS,
-                extraArgs: VRFV2PlusClient._argsToBytes(
-                    VRFV2PlusClient.ExtraArgsV1({nativePayment: false})
-                )
+                extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
             })
         );
         lotRandomWordsRequestMade = true;
@@ -148,7 +140,10 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         uint256,
         /* requestId */
         uint256[] calldata randomWords
-    ) internal override {
+    )
+        internal
+        override
+    {
         s_randomWords = randomWords;
         emit ReturnedRandomness(randomWords);
     }

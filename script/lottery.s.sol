@@ -11,8 +11,7 @@ contract LotteryScript is Script {
     SimpleLottery public simpleLottery;
     VRFCoordinatorV2_5Mock public vRFCoordinatorV2_5Mock;
 
-    bytes32 immutable KEYHASH =
-        0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae;
+    bytes32 immutable KEYHASH = 0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae;
 
     uint96 immutable _BASEFEE = 100000000000000000;
     uint96 immutable _GASPRICELINK = 1000000000;
@@ -23,25 +22,15 @@ contract LotteryScript is Script {
     function run() public {
         vm.startBroadcast();
 
-        vRFCoordinatorV2_5Mock = new VRFCoordinatorV2_5Mock(
-            _BASEFEE,
-            _GASPRICELINK,
-            _WEIPERUNITLINK
-        );
+        vRFCoordinatorV2_5Mock = new VRFCoordinatorV2_5Mock(_BASEFEE, _GASPRICELINK, _WEIPERUNITLINK);
 
-        address VRFCoordinatorV2_5Mock_address = address(
-            vRFCoordinatorV2_5Mock
-        );
+        address VRFCoordinatorV2_5Mock_address = address(vRFCoordinatorV2_5Mock);
 
         uint256 _subid = vRFCoordinatorV2_5Mock.createSubscription();
 
-        vRFCoordinatorV2_5Mock.fundSubscription(_subid, 100000000000000000000); 
+        vRFCoordinatorV2_5Mock.fundSubscription(_subid, 100000000000000000000);
 
-        simpleLottery = new SimpleLottery(
-            _subid,
-            VRFCoordinatorV2_5Mock_address,
-            KEYHASH
-        );
+        simpleLottery = new SimpleLottery(_subid, VRFCoordinatorV2_5Mock_address, KEYHASH);
 
         address SimpleLottery_address = address(simpleLottery);
 
