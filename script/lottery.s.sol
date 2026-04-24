@@ -35,7 +35,7 @@ contract LotteryScript is Script {
 
         uint256 _subid = vRFCoordinatorV2_5Mock.createSubscription();
 
-        vRFCoordinatorV2_5Mock.fundSubscription(_subid, 100000000000000000000);
+        vRFCoordinatorV2_5Mock.fundSubscription(_subid, 100000000000000000000); 
 
         simpleLottery = new SimpleLottery(
             _subid,

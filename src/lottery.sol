@@ -9,6 +9,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     bool public lotStarted;
     bool public lotRewardsReleased;
     bool public lotFinished;
+    bool lotRandomWordsRequestMade;
     address public lotWinner;
     uint256 public lotNonce;
 
@@ -19,6 +20,48 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
 
     // contract owner, the one to take comissions
     address public lotAdmin;
+
+        // Your subscription ID.
+    uint256 immutable s_subscriptionId;
+
+    // The gas lane to use, which specifies the maximum gas price to bump to.
+    // For a list of available gas lanes on each network,
+    // see https://docs.chain.link/docs/vrf-contracts/#configurations
+    bytes32 immutable s_keyHash;
+
+    // stores the limit of gas for random words to be received.
+    uint32 constant CALLBACK_GAS_LIMIT = 100_000;
+
+    // The default is 3, but you can set this higher.
+    uint16 constant REQUEST_CONFIRMATIONS = 3;
+
+    // For this example, retrieve 1 random values in one request.
+    // Cannot exceed VRFCoordinatorV2_5.MAX_NUM_WORDS.
+    uint32 constant NUM_WORDS = 1;
+
+//latest random word
+    uint256[] public s_randomWords;
+
+    // latest request ID
+    uint256 public s_requestId;
+
+    event ReturnedRandomness(uint256[] randomWords);
+
+    /**
+     * @notice Constructor inherits VRFConsumerBaseV2Plus
+     *
+     * @param subscriptionId - the subscription ID that this contract uses for funding requests
+     * @param vrfCoordinator - coordinator, check https://docs.chain.link/vrf/v2-5/supported-networks
+     * @param keyHash - the gas lane to use, which specifies the maximum gas price to bump to
+     */
+    constructor(
+        uint256 subscriptionId,
+        address vrfCoordinator,
+        bytes32 keyHash
+    ) VRFConsumerBaseV2Plus(vrfCoordinator) {
+        s_keyHash = keyHash;
+        s_subscriptionId = subscriptionId;
+    }
 
     // let anyone create a new Lottery.
     // it does not run the lottery immediatelly to prevent front-running.
@@ -46,20 +89,19 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         return (ticketBought_, lotNonce);
     }
 
-    function requestRandomWinner() public returns (uint256, address) {
+    function requestRandomWinner() public  {
         require(lotFinished = true, "Not finished yet");
-        uint256 winnerTicket_ = 1; // here we need to implement chainlink call
-        // calls requestRandomWords()
-        // then we need to break this function down to two separate functions
-        lotWinner = lotTicketsMapping[winnerTicket_];
-        return (winnerTicket_, lotWinner);
+    requestRandomWords();
     }
 
-    // function revealRandomWinner
-    // if ticket nonce > 9 then result - random % 0000
-    // if ticket nonce > 99 then result - random % 000
-    //if ticket nonce > 999 then result - random % 00
-    // else ticket nonce then result - random % 0
+    function revealRandomWinner () public returns (uint256, address) {
+    if (lotNonce > 9) { result_ =  s_randomWords % 10 };
+    else if  (lotNonce > 99) { then result_ =  s_randomWords % 100 };
+    else if  (lotNonce > 999) { then result_ =  s_randomWords % 1000 };
+    else  { result_ =  s_randomWords % 10000 };
+    lotWinner = lotTicketsMapping[result_];
+    return (result_, lotWinner);
+    }
 
     // Use it to help your friend receive their lottery prizes!
     function releaseRewards() public {
@@ -74,55 +116,12 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         require(sent, "Failed to send Ether");
     }
 
-    // Your subscription ID.
-    uint256 immutable s_subscriptionId;
-
-    // The gas lane to use, which specifies the maximum gas price to bump to.
-    // For a list of available gas lanes on each network,
-    // see https://docs.chain.link/docs/vrf-contracts/#configurations
-    bytes32 immutable s_keyHash;
-
-    // Depends on the number of requested values that you want sent to the
-    // fulfillRandomWords() function. Storing each word costs about 20,000 gas,
-    // so 100,000 is a safe default for this example contract. Test and adjust
-    // this limit based on the network that you select, the size of the request,
-    // and the processing of the callback request in the fulfillRandomWords()
-    // function.
-    uint32 constant CALLBACK_GAS_LIMIT = 100_000;
-
-    // The default is 3, but you can set this higher.
-    uint16 constant REQUEST_CONFIRMATIONS = 3;
-
-    // For this example, retrieve 1 random values in one request.
-    // Cannot exceed VRFCoordinatorV2_5.MAX_NUM_WORDS.
-    uint32 constant NUM_WORDS = 1;
-
-    uint256[] public s_randomWords;
-    uint256 public s_requestId;
-
-    event ReturnedRandomness(uint256[] randomWords);
-
-    /**
-     * @notice Constructor inherits VRFConsumerBaseV2Plus
-     *
-     * @param subscriptionId - the subscription ID that this contract uses for funding requests
-     * @param vrfCoordinator - coordinator, check https://docs.chain.link/vrf/v2-5/supported-networks
-     * @param keyHash - the gas lane to use, which specifies the maximum gas price to bump to
-     */
-    constructor(
-        uint256 subscriptionId,
-        address vrfCoordinator,
-        bytes32 keyHash
-    ) VRFConsumerBaseV2Plus(vrfCoordinator) {
-        s_keyHash = keyHash;
-        s_subscriptionId = subscriptionId;
-    }
-
     /**
      * @notice Requests randomness
      * Assumes the subscription is funded sufficiently; "Words" refers to unit of data in Computer Science
      */
     function requestRandomWords() external {
+        require(lotRandomWordsRequestMade = false, "Already requested");
         // Will revert if subscription is not set and funded.
         s_requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
@@ -136,6 +135,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
                 )
             })
         );
+        lotRandomWordsRequestMade = true;
     }
 
     /**
