@@ -83,11 +83,12 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     }
 
     function revealRandomWinner() public returns (uint256, address) {
+        uint256 s_randomWord_ = s_randomWords[1];
         uint256 result_;
-        if (lotNonce > 9) result_ = s_randomWords % 10;
-        else if (lotNonce > 99) result_ = s_randomWords % 100;
-        else if (lotNonce > 999) result_ = s_randomWords % 1000;
-        else result_ = s_randomWords % 10000;
+        if (lotNonce > 9) result_ = s_randomWord_ % 10;
+        else if (lotNonce > 99) result_ = s_randomWord_ % 100;
+        else if (lotNonce > 999) result_ = s_randomWord_ % 1000;
+        else result_ = s_randomWord_ % 10000;
         lotWinner = lotTicketsMapping[result_];
         return (result_, lotWinner);
     }
