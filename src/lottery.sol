@@ -5,27 +5,52 @@ import {VRFConsumerBaseV2Plus} from "lib/chainlink-evm/contracts/src/v0.8/vrf/de
 import {VRFV2PlusClient} from "lib/chainlink-evm/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 
 contract SimpleLottery is VRFConsumerBaseV2Plus {
+    // @notice Identifier name of the lottery.
     // lottery name. serves as a simple identifier for user.
-    // not used in any functions beside the one that initiate a lottery.
+    // @dev Not used in any functions beside the lottery initialisation.
     string public lotName;
 
     // the max amount of tickets to be bought;
     uint256 public lotMaxNonce;
 
+    // @notice Indicates whether lottery has started
+    // @dev Updated in ___ function
     bool public lotStarted;
-    bool public lotRewardsReleased;
+
+    // @notice Indicates whether lottery is finished
+    // @dev Updated in ___ function
     bool public lotFinished;
+
+    // @notice Indicates whether VRF request was already made
+    // @dev Updated in ___ function
     bool public lotRandomWordsRequestMade;
+
+    // @notice Indicates whether rewards were already released
+    // @dev Updated in ___ function
+    bool public lotRewardsReleased;
+
+    // @notice The lottery winner address. This address is only allowed to withdraw rewards.
+    // @dev Found out in two steps:
+    // 1.
+    // 2.
     address public lotWinner;
+
+    // @notice the amount of tickets bout for lottery participation.
+    // @udev used at:
+    // 1.
+    // 2.
     uint256 public lotNonce;
 
-    // stores the data about all tickets boughst.
+    // @notice Mapping from ticket index to buyer address.
+    // @dev Ticket index = lotNonce in the moment of ticket purchase.
     mapping(uint256 => address) lotTicketsMapping;
 
-    // the Rewards sum that the winner can withdraw once lottery is ended and winner is found.
+    // @notice the Rewards the winner can withdraw once lottery is ended and winner is found.
+    // @dev sum updated in __ function each time someone buys a ticket.
     uint256 public lotRewards;
 
-    // contract owner, the one to take comissions
+    // @notice contract owner, the one to take comissions.
+    // @dev the equiwalent of contract owner.
     address public lotAdmin;
 
     // Your subscription ID.
@@ -52,15 +77,13 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // latest request ID
     uint256 public s_requestId;
 
+    // event emitted after random words are sent back by chainlink
     event ReturnedRandomness(uint256[] randomWords);
 
-    /**
-     * @notice Constructor inherits VRFConsumerBaseV2Plus
-     *
-     * @param subscriptionId - the subscription ID that this contract uses for funding requests
-     * @param vrfCoordinator - coordinator, check https://docs.chain.link/vrf/v2-5/supported-networks
-     * @param keyHash - the gas lane to use, which specifies the maximum gas price to bump to
-     */
+    // @notice Constructor inherits VRFConsumerBaseV2Plus
+    // @param subscriptionId - the subscription ID that this contract uses for funding requests
+    // @param vrfCoordinator - coordinator, check https://docs.chain.link/vrf/v2-5/supported-networks
+    // @param keyHash - the gas lane to use, which specifies the maximum gas price to bump to
     constructor(uint256 subscriptionId, address vrfCoordinator, bytes32 keyHash) VRFConsumerBaseV2Plus(vrfCoordinator) {
         s_keyHash = keyHash;
         s_subscriptionId = subscriptionId;
@@ -126,12 +149,10 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         require(sent, "Failed to send Ether");
     }
 
-    /**
-     * @notice Requests randomness
-     * Assumes the subscription is funded sufficiently; "Words" refers to unit of data in Computer Science
-     *     // as soon as lottery ends, anyone can initiate this function to run a chainlink request.
-     * due to lotRandomWordsRequestMade this function can be run only once on the entire contract life cycle.
-     */
+    // @notice Requests randomness
+    // Assumes the subscription is funded sufficiently; "Words" refers to unit of data in Computer Science
+    // as soon as lottery ends, anyone can initiate this function to run a chainlink request.
+    // due to lotRandomWordsRequestMade this function can be run only once on the entire contract life cycle.
     function requestRandomWords() public {
         require(lotFinished = true, "Not finished yet");
         require(lotRandomWordsRequestMade = false, "Already requested");
@@ -149,12 +170,9 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         lotRandomWordsRequestMade = true;
     }
 
-    /**
-     * @notice Callback function used by VRF Coordinator
-     *
-     * @param  - id of the request
-     * @param randomWords - array of random results from VRF Coordinator
-     */
+    // @notice Callback function used by VRF Coordinator
+    // @param  - id of the request
+    // @param randomWords - array of random results from VRF Coordinator
     function fulfillRandomWords(
         uint256,
         /* requestId */
