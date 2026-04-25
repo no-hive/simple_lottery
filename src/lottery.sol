@@ -97,8 +97,8 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // to start a lottery admin als oneeds to buy out the very first ticket.
     function createAndStartLottery(string memory _name, uint256 _maxNonce) public payable onlyOwner returns (bool) {
         require(lotStarted == false, "Already started");
-        require(_maxNonce < 10000);
         require(msg.value == 0.01 ether, "Send 0.01 ETH to buy ticket");
+        require(_maxNonce < 10000);
         lotName = _name;
         lotMaxNonce = _maxNonce;
         lotNonce = 0;
@@ -110,6 +110,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // user can buy any amount of tickets, increasing the chances to win accordingly.
     function buyTicket() public payable returns (bool, uint256) {
         require(lotStarted == true, "Not started yet");
+        require(lotFinished == false, "Already finished");
         require(msg.value == 0.01 ether, "Send 0.01 ETH to buy ticket");
         lotTicketsMapping[lotNonce] = msg.sender;
         lotNonce++;
@@ -121,7 +122,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // after the random words are got, anyone can call this function
     // once it's called, the winner is officially found and can withdraw the rewards.
     function revealRandomWinner() public returns (uint256, address) {
-        require(lotRandomWordsRequestMade = false, "Already requested");
+        require(lotRandomWordsRecieved == true, "No oracle answer yet");
         uint256 s_randomWord_ = s_randomWords[1];
         uint256 result_;
         if (lotNonce < 9) result_ = s_randomWord_ % 10;
@@ -148,7 +149,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // in this case, this comission will be first used to pay for orcale call
     // and only then the owner can take the rest
     function releaseComissions() public onlyOwner {
-        require(lotRewardsReleased = true, "Release rewards first");
+        require(lotRewardsReleased == true, "Release rewards first");
         (bool sent,) = lotAdmin.call{value: address(this).balance}("");
         require(sent, "Failed to send Ether");
     }
@@ -158,8 +159,8 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // as soon as lottery ends, anyone can initiate this function to run a chainlink request.
     // due to lotRandomWordsRequestMade this function can be run only once on the entire contract life cycle.
     function requestRandomWords() public {
-        require(lotFinished = true, "Not finished yet");
-        require(lotRandomWordsRequestMade = false, "Already requested");
+        require(lotFinished == true, "Not finished yet");
+        require(lotRandomWordsRequestMade == false, "Already requested");
         // Will revert if subscription is not set and funded.
         s_requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
