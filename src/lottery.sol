@@ -91,6 +91,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     constructor(uint256 subscriptionId, address vrfCoordinator, bytes32 keyHash) VRFConsumerBaseV2Plus(vrfCoordinator) {
         s_keyHash = keyHash;
         s_subscriptionId = subscriptionId;
+
     }
 
     // let contract administrator create a new Lottery.
