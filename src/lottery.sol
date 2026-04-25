@@ -106,7 +106,8 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         lotName = _name;
         lotNonce = 0;
         lotStarted = true;
-        return (lotStarted);
+        (bool ticketBought_, uint256 lotNonce) = buyTicket();
+        return (lotStarted, ticketBought_, lotNonce);
     }
 
     // the function that allows user to participate in the lottery
@@ -117,7 +118,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         require(msg.value == 0.01 ether, "Send 0.01 ETH to buy ticket");
         lotTicketsMapping[lotNonce] = msg.sender;
         lotNonce++;
-        lotRewards += 0.01 ether;
+        lotRewards += 0.008 ether; // only 80% of ticket price is written down - other goes to comissions.
         bool ticketBought_ = true;
         if (lotMaxNonce == lotNonce) {
             lotFinished = true;
