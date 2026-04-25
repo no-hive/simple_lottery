@@ -53,10 +53,6 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // @dev sum updated in __ function each time someone buys a ticket.
     uint256 public lotRewards;
 
-    // @notice contract owner, the one to take comissions.
-    // @dev the equiwalent of contract owner.
-    address public lotAdmin;
-
     // Your subscription ID.
     uint256 immutable s_subscriptionId;
 
@@ -91,7 +87,6 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     constructor(uint256 subscriptionId, address vrfCoordinator, bytes32 keyHash) VRFConsumerBaseV2Plus(vrfCoordinator) {
         s_keyHash = keyHash;
         s_subscriptionId = subscriptionId;
-
     }
 
     // let contract administrator create a new Lottery.

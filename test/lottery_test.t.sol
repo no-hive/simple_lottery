@@ -1,5 +1,5 @@
 // 1. need to check if deploy runs correctly
-// 1.1. 
+// 1.1.
 
 // 2. let's check if lottery initialization works
 // call createAndStartLottery("test_name", 0) + payable + onlyowner
