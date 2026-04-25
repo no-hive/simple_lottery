@@ -95,12 +95,19 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
 
     // let contract administrator create a new Lottery.
     // to start a lottery admin als oneeds to buy out the very first ticket.
-    function createAndStartLottery(string memory _name, uint256 _maxNonce) public payable onlyOwner returns (bool) {
+    function createAndStartLottery(string memory _name, uint8 _maxTicketAmountOption)
+        public
+        payable
+        onlyOwner
+        returns (bool)
+    {
         require(lotStarted == false, "Already started");
         require(msg.value == 0.01 ether, "Send 0.01 ETH to buy ticket");
-        require(_maxNonce < 10000);
+        if (_maxTicketAmountOption == 0) lotMaxNonce = 10;
+        else if (_maxTicketAmountOption == 1) lotMaxNonce = 100;
+        else if (_maxTicketAmountOption == 2) lotMaxNonce = 1000;
+        else lotMaxNonce = 10000;
         lotName = _name;
-        lotMaxNonce = _maxNonce;
         lotNonce = 0;
         lotStarted = true;
         return (lotStarted);
@@ -130,9 +137,9 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         require(lotRandomWordsRecieved == true, "No oracle answer yet");
         uint256 s_randomWord_ = s_randomWords[1];
         uint256 result_;
-        if (lotNonce < 9) result_ = s_randomWord_ % 10;
-        else if (lotNonce < 99) result_ = s_randomWord_ % 100;
-        else if (lotNonce < 999) result_ = s_randomWord_ % 1000;
+        if (lotNonce == 10) result_ = s_randomWord_ % 10;
+        else if (lotNonce == 100) result_ = s_randomWord_ % 100;
+        else if (lotNonce == 1000) result_ = s_randomWord_ % 1000;
         else result_ = s_randomWord_ % 10000;
         lotWinner = lotTicketsMapping[result_];
         return (result_, lotWinner);
