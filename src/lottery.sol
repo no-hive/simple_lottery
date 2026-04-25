@@ -116,7 +116,12 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         lotNonce++;
         lotRewards += 0.01 ether;
         bool ticketBought_ = true;
-        return (ticketBought_, lotNonce);
+        if (lotMaxNonce == lotNonce) {
+            lotFinished = true;
+            return (ticketBought_, lotNonce);
+        } else {
+            return (ticketBought_, lotNonce);
+        }
     }
 
     // after the random words are got, anyone can call this function
