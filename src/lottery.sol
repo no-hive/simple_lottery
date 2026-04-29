@@ -159,7 +159,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // and only then the owner can take the rest
     function releaseComissions() public onlyOwner {
         require(lotRewardsReleased == true, "Release rewards first");
-        (bool sent,) = lotAdmin.call{value: address(this).balance}("");
+        (bool sent,) = msg.sender.call{value: address(this).balance}("");
         require(sent, "Failed to send Ether");
     }
 
