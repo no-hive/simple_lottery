@@ -1,24 +1,22 @@
 pragma solidity ^0.8.4;
 
-// import "forge-std/Test.sol";
-// import "../src/lottery.sol";
+import "forge-std/Test.sol";
+import "../src/lottery.sol";
 
-// contract LotteryTest is Test {
-//    SimpleLottery simpleLottery;
+contract LotteryTest is Test {
+    SimpleLottery simpleLottery;
 
-// these two ones are used for
-// 1. deployment
-// 2. CheckConstructorWorkedCorrectly test
+    // these two ones are used for
+    // 1. deployment
+    // 2. CheckConstructorWorkedCorrectly test
     uint256 immutable DEFAULT_SUBSCRIBTION_ID;
     bytes32 immutable DEFAULT_KEYHASH;
 
-// these ones are used to initialise test lottery
-string memory _name = "HELLO_GAMBLERS"
-uint8 _maxTicketAmountOption = 1
+    // these ones are used to initialise test lottery
+    // tring memory _name = "HELLO_GAMBLERS"
+    //uint8 _maxTicketAmountOption = 1
 
-
-
-function setUp() public {
+    function setUp() public {
         vRFCoordinatorV2_5Mock = new VRFCoordinatorV2_5Mock(_BASEFEE, _GASPRICELINK, _WEIPERUNITLINK);
 
         address VRFCoordinatorV2_5Mock_address = address(vRFCoordinatorV2_5Mock);
@@ -32,9 +30,8 @@ function setUp() public {
         address SimpleLottery_address = address(simpleLottery);
 
         vRFCoordinatorV2_5Mock.addConsumer(_subid, SimpleLottery_address);
-
+    }
 }
-
 
 // 1. need to check if deploy runs correctly
 // 1.1. check addresses somehow + variables that are inscripted via contractor.
@@ -42,7 +39,7 @@ function setUp() public {
 // function CheckConstructorWorkedCorrectly () {
 
 // assertEq(CONTRACT.s_subscriptionId(), DEFAULT_SUBSCRIBTION_ID);
- // assertEq(CONTRACT.s_keyHash(), DEFAULT_KEYHASH);
+// assertEq(CONTRACT.s_keyHash(), DEFAULT_KEYHASH);
 //}
 
 // function CheckLotteryInitializationWorks () {
@@ -50,10 +47,9 @@ function setUp() public {
 // assertEq (CONTRACT.lotNonce(), 1);
 // assertEq (CONTRACT.lotMaxNonce(), 10);
 // assertEq (CONTRACT.lotRewards(), 0.1 ether);
-    // + mapping(uint256 => address) lotTicketsMapping;
-    // + contract balance == 0.1 ether;
-}
-
+// + mapping(uint256 => address) lotTicketsMapping;
+// + contract balance == 0.1 ether;
+//}
 
 // 3. let's check if lottery initizalition really should be payable
 // call createAndStartLottery("test_name", 0) + onlyowner
