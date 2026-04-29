@@ -106,8 +106,8 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         lotName = _name;
         lotNonce = 0;
         lotStarted = true;
-        (bool ticketBought_, lotNonce) = buyTicket();
-        return (lotStarted, ticketBought_, lotNonce);
+        (bool ticketBought_, uint256 lotNonce_) = buyTicket();
+        return (lotStarted, ticketBought_, lotNonce_);
     }
 
     // the function that allows user to participate in the lottery
