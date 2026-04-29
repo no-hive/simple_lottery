@@ -95,7 +95,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         public
         payable
         onlyOwner
-        returns (bool)
+        returns (bool, bool, uint256)
     {
         require(lotStarted == false, "Already started");
         require(msg.value == 0.01 ether, "Send 0.01 ETH to buy ticket");
