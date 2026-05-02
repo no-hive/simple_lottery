@@ -47,21 +47,21 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
 
     // @notice Mapping from ticket index to buyer address.
     // @dev Ticket index = lotNonce in the moment of ticket purchase.
-    mapping(uint256 => address) lotTicketsMapping;
+    mapping(uint256 => address) public lotTicketsMapping;
 
     // @notice the Rewards the winner can withdraw once lottery is ended and winner is found.
     // @dev sum updated in __ function each time someone buys a ticket.
     uint256 public lotRewards;
 
     // Your subscription ID.
-    uint256 immutable s_subscriptionId;
+    uint256 public s_subscriptionId;
 
     // The gas lane to use, which specifies the maximum gas price to bump to.
     // For a list of available gas lanes on each network,
     // see https://docs.chain.link/docs/vrf-contracts/#configurations
     bytes32 public immutable s_keyHash;
 
-    // stores the limit of gas for random words to be received.
+    // stores the limit of gas for random wordSs to be received.
     uint32 constant CALLBACK_GAS_LIMIT = 100_000;
 
     // The default is 3, but you can set this higher.
@@ -109,6 +109,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         (bool ticketBought_, uint256 lotNonce_) = buyTicket();
         return (lotStarted, ticketBought_, lotNonce_);
     }
+    
 
     // the function that allows user to participate in the lottery
     // user can buy any amount of tickets, increasing the chances to win accordingly.
@@ -199,4 +200,5 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         emit ReturnedRandomness(randomWords);
         lotRandomWordsRecieved = true;
     }
+
 }

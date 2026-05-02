@@ -5,16 +5,17 @@ import "../src/lottery.sol";
 import {VRFCoordinatorV2_5Mock} from "lib/chainlink-evm/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
 
 contract LotteryTest is Test {
-    SimpleLottery simpleLottery;
+    SimpleLottery public simpleLottery;
 
     // these two ones are used for
     // 1. deployment
     // 2. CheckConstructorWorkedCorrectly test
-    uint256 immutable DEFAULT_SUBSCRIBTION_ID;
-    bytes32 immutable DEFAULT_KEYHASH;
+    uint256 public DEFAULT_SUBSCRIBTION_ID;
 
     string TEST_NAME = "HELLO_GAMBLERS";
     uint8 TEST_MAX_CAP = 0;
+
+    uint256 subid_;
 
     VRFCoordinatorV2_5Mock public vRFCoordinatorV2_5Mock;
 
@@ -29,15 +30,21 @@ contract LotteryTest is Test {
 
         address VRFCoordinatorV2_5Mock_address = address(vRFCoordinatorV2_5Mock);
 
-        uint256 _subid = vRFCoordinatorV2_5Mock.createSubscription();
+        DEFAULT_SUBSCRIBTION_ID = vRFCoordinatorV2_5Mock.createSubscription();
 
-        vRFCoordinatorV2_5Mock.fundSubscription(_subid, 100000000000000000000);
+        vRFCoordinatorV2_5Mock.fundSubscription(DEFAULT_SUBSCRIBTION_ID, 100000000000000000000);
 
-        simpleLottery = new SimpleLottery(_subid, VRFCoordinatorV2_5Mock_address, KEYHASH);
+        simpleLottery = new SimpleLottery(DEFAULT_SUBSCRIBTION_ID, VRFCoordinatorV2_5Mock_address, KEYHASH);
 
         address SimpleLottery_address = address(simpleLottery);
 
-        vRFCoordinatorV2_5Mock.addConsumer(_subid, SimpleLottery_address);
+        vRFCoordinatorV2_5Mock.addConsumer(DEFAULT_SUBSCRIBTION_ID, SimpleLottery_address);
+    }
+
+    function testSetUpFunctionSubId () public  {
+
+       assertEq(simpleLottery.s_subscriptionId(),  DEFAULT_SUBSCRIBTION_ID); 
+
     }
 
     // 1. need to check if deploy runs correctly
@@ -52,8 +59,10 @@ contract LotteryTest is Test {
         assertEq(simpleLottery.lotNonce(), 1);
         assertEq(simpleLottery.lotMaxNonce(), 10);
         assertEq(simpleLottery.lotRewards(), 0.008 ether);
-        //+ mapping(uint256 => address) lotTicketsMapping;
-        //+ contract balance == 0.1 ether;
+        uint256 balance = address(simpleLottery).balance;
+        assertEq(balance, 0.01 ether);
+ //       address first_owner = simpleLottery.lotTicketsMapping1);
+ //       assertEq(first_owner, simpleLottery.s_pendingOwner);
     }
 }
 
