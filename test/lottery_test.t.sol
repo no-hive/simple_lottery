@@ -2,6 +2,7 @@ pragma solidity ^0.8.4;
 
 import "forge-std/Test.sol";
 import "../src/lottery.sol";
+import {VRFCoordinatorV2_5Mock} from "lib/chainlink-evm/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
 
 contract LotteryTest is Test {
     SimpleLottery simpleLottery;
@@ -15,6 +16,14 @@ contract LotteryTest is Test {
     // these ones are used to initialise test lottery
     // tring memory _name = "HELLO_GAMBLERS"
     //uint8 _maxTicketAmountOption = 1
+
+    VRFCoordinatorV2_5Mock public vRFCoordinatorV2_5Mock;
+
+    bytes32 immutable KEYHASH = 0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae;
+
+    uint96 immutable _BASEFEE = 100000000000000000;
+    uint96 immutable _GASPRICELINK = 1000000000;
+    int256 immutable _WEIPERUNITLINK = 3984445400000000;
 
     function setUp() public {
         vRFCoordinatorV2_5Mock = new VRFCoordinatorV2_5Mock(_BASEFEE, _GASPRICELINK, _WEIPERUNITLINK);
@@ -31,16 +40,14 @@ contract LotteryTest is Test {
 
         vRFCoordinatorV2_5Mock.addConsumer(_subid, SimpleLottery_address);
     }
+
+    // 1. need to check if deploy runs correctly
+    // 1.1. check addresses somehow + variables that are inscripted via contractor.
+
+    function testConstructorWorkedCorrectly() public {
+        assertEq(SimpleLottery.s_keyHash(), KEYHASH);
+    }
 }
-
-// 1. need to check if deploy runs correctly
-// 1.1. check addresses somehow + variables that are inscripted via contractor.
-
-// function CheckConstructorWorkedCorrectly () {
-
-// assertEq(CONTRACT.s_subscriptionId(), DEFAULT_SUBSCRIBTION_ID);
-// assertEq(CONTRACT.s_keyHash(), DEFAULT_KEYHASH);
-//}
 
 // function CheckLotteryInitializationWorks () {
 // assertEq (CONTRACT.createAndStartLottery(TEST_NAME, TEST_AMOUNT),(true, true, 1));

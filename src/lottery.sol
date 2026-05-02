@@ -59,7 +59,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // The gas lane to use, which specifies the maximum gas price to bump to.
     // For a list of available gas lanes on each network,
     // see https://docs.chain.link/docs/vrf-contracts/#configurations
-    bytes32 immutable s_keyHash;
+    bytes32 public s_keyHash;
 
     // stores the limit of gas for random words to be received.
     uint32 constant CALLBACK_GAS_LIMIT = 100_000;
