@@ -13,9 +13,8 @@ contract LotteryTest is Test {
     uint256 immutable DEFAULT_SUBSCRIBTION_ID;
     bytes32 immutable DEFAULT_KEYHASH;
 
-    // these ones are used to initialise test lottery
-    // tring memory _name = "HELLO_GAMBLERS"
-    //uint8 _maxTicketAmountOption = 1
+    string TEST_NAME = "HELLO_GAMBLERS";
+    uint8 TEST_MAX_CAP = 0;
 
     VRFCoordinatorV2_5Mock public vRFCoordinatorV2_5Mock;
 
@@ -47,16 +46,16 @@ contract LotteryTest is Test {
     function testConstructorWorkedCorrectly() public {
         assertEq(simpleLottery.s_keyHash(), KEYHASH);
     }
-}
 
-// function CheckLotteryInitializationWorks () {
-// assertEq (CONTRACT.createAndStartLottery(TEST_NAME, TEST_AMOUNT),(true, true, 1));
-// assertEq (CONTRACT.lotNonce(), 1);
-// assertEq (CONTRACT.lotMaxNonce(), 10);
-// assertEq (CONTRACT.lotRewards(), 0.1 ether);
-// + mapping(uint256 => address) lotTicketsMapping;
-// + contract balance == 0.1 ether;
-//}
+    function testLotteryInitialization() public {
+        simpleLottery.createAndStartLottery{value: 0.01 ether}(TEST_NAME, TEST_MAX_CAP);
+        assertEq(simpleLottery.lotNonce(), 1);
+        assertEq(simpleLottery.lotMaxNonce(), 10);
+        assertEq(simpleLottery.lotRewards(), 0.008 ether);
+        //+ mapping(uint256 => address) lotTicketsMapping;
+        //+ contract balance == 0.1 ether;
+    }
+}
 
 // 3. let's check if lottery initizalition really should be payable
 // call createAndStartLottery("test_name", 0) + onlyowner
