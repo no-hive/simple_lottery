@@ -45,7 +45,7 @@ contract LotteryTest is Test {
     // 1.1. check addresses somehow + variables that are inscripted via contractor.
 
     function testConstructorWorkedCorrectly() public {
-        assertEq(SimpleLottery.s_keyHash(), KEYHASH);
+        assertEq(simpleLottery.s_keyHash(), KEYHASH);
     }
 }
 
