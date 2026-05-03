@@ -7,12 +7,18 @@ import {VRFConsumerBaseV2Plus} from "lib/chainlink-evm/contracts/src/v0.8/vrf/de
 import {VRFV2PlusClient} from "lib/chainlink-evm/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 
 contract SimpleLottery is VRFConsumerBaseV2Plus {
+    //
     //======================
     // EVENTS
     //======================
 
+    // LotteryStarted ();
+    // NewTicketBought (ticket nonce)
+    // LotteryFinished ();
     // event emitted after random words are sent back by chainlink.
     event ReturnedRandomness(uint256[] randomWords);
+    //RewardsReleased ();
+    //ComissionsReleased ();
 
     //======================
     // NO MAGICAL NUMBERS
@@ -136,6 +142,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         lotNonce = 0;
         lotStarted = true;
         (bool ticketBought_, uint256 lotNonce_) = buyTicket_();
+        emit LotteryStarted();
         return (lotStarted, ticketBought_, lotNonce_);
     }
 
@@ -147,12 +154,8 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         lotNonce++;
         lotRewards += PRIZE_POOL_SHARE; // only 80% of ticket price is written down - other goes to comissions.
         bool ticketBought_ = true;
-        if (lotMaxNonce == lotNonce) {
-            lotFinished = true;
-            return (ticketBought_, lotNonce);
-        } else {
-            return (ticketBought_, lotNonce);
-        }
+        emit NewTicketBought(lotNonce);
+        return (ticketBought_, lotNonce);
     }
 
     //======================
@@ -171,8 +174,11 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         bool ticketBought_ = true;
         if (lotMaxNonce == lotNonce) {
             lotFinished = true;
+            emit NewTicketBought(lotNonce);
+            emit LotteryFinished();
             return (ticketBought_, lotNonce);
         } else {
+            emit NewTicketBought(lotNonce);
             return (ticketBought_, lotNonce);
         }
     }
@@ -244,6 +250,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         require(!lotRewardsReleased, "No rewards");
         (bool sent,) = lotWinner.call{value: lotRewards}("");
         require(sent, "Failed to send Ether");
+        emit RewardsReleased();
     }
 
     // as soon as winners rewards released, owner takes the request.
@@ -255,5 +262,6 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         require(lotRewardsReleased, "Release rewards first");
         (bool sent,) = msg.sender.call{value: address(this).balance}("");
         require(sent, "Failed to send Ether");
+        emit ComissionsReleased();
     }
 }
