@@ -172,6 +172,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     function requestRandomWords() public {
         require(lotFinished == true, "Not finished yet");
         require(lotRandomWordsRequestMade == false, "Already requested");
+        lotRandomWordsRequestMade = true;
         // Will revert if subscription is not set and funded.
         s_requestId = s_vrfCoordinator.requestRandomWords(
             VRFV2PlusClient.RandomWordsRequest({
@@ -183,7 +184,6 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
                 extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
             })
         );
-        lotRandomWordsRequestMade = true;
     }
 
     // @notice Callback function used by VRF Coordinator
@@ -221,7 +221,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // also use it if you are the greedy admin that wants your comissions to be unlocked
     // after winner takes their part.
     function releaseRewards() public {
-        require(lotRewardsReleased == false, "No rewards");
+        require(!lotRewardsReleased, "No rewards");
         (bool sent,) = lotWinner.call{value: lotRewards}("");
         require(sent, "Failed to send Ether");
     }
@@ -232,7 +232,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // in this case, this comission will be first used to pay for orcale call
     // and only then the owner can take the rest
     function releaseComissions() public onlyOwner {
-        require(lotRewardsReleased == true, "Release rewards first");
+        require(lotRewardsReleased, "Release rewards first");
         (bool sent,) = msg.sender.call{value: address(this).balance}("");
         require(sent, "Failed to send Ether");
     }
