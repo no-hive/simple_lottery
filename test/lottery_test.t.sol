@@ -26,12 +26,12 @@ contract LotteryTest is Test {
     int256 immutable _WEIPERUNITLINK = 3984445400000000;
 
     address OWNER = address(1);
+    address USER = address(2);
 
     function setUp() public {
         // we create mock OWNER to check that
         // 1. first ticket is really bought out by OWNER
         // 2.Only Owner Functions can be called only by initial OWNER
-        vm.deal(OWNER, 1 ether);
         vm.startPrank(OWNER);
 
         vRFCoordinatorV2_5Mock = new VRFCoordinatorV2_5Mock(_BASEFEE, _GASPRICELINK, _WEIPERUNITLINK);
@@ -62,8 +62,17 @@ contract LotteryTest is Test {
         assertEq(simpleLottery.s_keyHash(), KEYHASH);
     }
 
+    function testLotteryInitializationWithNotAOwner() public {
+        vm.deal(USER, 1 ether);
+        vm.startPrank(USER);
+        vm.expectRevert();
+        simpleLottery.createAndStartLottery{value: 0.01 ether}(TEST_NAME, TEST_MAX_CAP);
+        vm.stopPrank();
+    }
+
     function testLotteryInitialization() public {
         vm.startPrank(OWNER);
+        vm.deal(OWNER, 1 ether);
         simpleLottery.createAndStartLottery{value: 0.01 ether}(TEST_NAME, TEST_MAX_CAP);
         assertEq(simpleLottery.lotNonce(), 1);
         assertEq(simpleLottery.lotMaxNonce(), 10);
