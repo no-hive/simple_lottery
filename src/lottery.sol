@@ -7,17 +7,7 @@ import {VRFConsumerBaseV2Plus} from "lib/chainlink-evm/contracts/src/v0.8/vrf/de
 import {VRFV2PlusClient} from "lib/chainlink-evm/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 
 contract SimpleLottery is VRFConsumerBaseV2Plus {
-    //======================
-    // ENUM
-    //======================
-
-    enum CapOption {
-        TEN,
-        HUNDRED,
-        THOUSAND,
-        TEN_THOUSAND
-    }
-
+    //
     //======================
     // EVENTS
     //======================
@@ -33,6 +23,13 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     //======================
     // NO MAGICAL NUMBERS
     //======================
+
+    enum CapOption {
+        TEN,
+        HUNDRED,
+        THOUSAND,
+        TEN_THOUSAND
+    }
 
     uint256 public constant TICKET_PRICE = 1e16; // 0.01 ether
     uint256 public constant PRIZE_POOL_SHARE = 8e15; // 0.008 ether
