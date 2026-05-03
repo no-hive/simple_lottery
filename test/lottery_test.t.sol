@@ -77,11 +77,31 @@ contract LotteryTest is Test {
         assertEq(simpleLottery.lotNonce(), 1);
         assertEq(simpleLottery.lotMaxNonce(), 10);
         assertEq(simpleLottery.lotRewards(), 0.008 ether);
+        assertEq(simpleLottery.lotName(), TEST_NAME);
         uint256 balance = address(simpleLottery).balance;
         assertEq(balance, 0.01 ether);
         address first_owner = simpleLottery.lotTicketsMapping(0);
         assertEq(first_owner, OWNER);
         vm.stopPrank();
+    }
+
+    function testLotteryReinitializationAttempt() public {
+        vm.deal(OWNER, 1 ether);
+        vm.startPrank(OWNER);
+        vm.expectRevert();
+        simpleLottery.createAndStartLottery{value: 0.01 ether}("WRONG", TEST_MAX_CAP);
+        vm.stopPrank();
+    }
+
+    function testLotteryBuyTicket() public {
+        vm.deal(USER, 1 ether);
+        vm.startPrank(USER);
+        simpleLottery.buyTicket();
+        uint256 balance = address(simpleLottery).balance;
+        assertEq(balance, 0.02 ether);
+        assertEq(simpleLottery.lotRewards(), 0.016 ether);
+        address user_owner = simpleLottery.lotTicketsMapping(0);
+        assertEq(user_owner, USER);
     }
 }
 
