@@ -103,7 +103,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     }
 
     //======================
-    // FUNCTION
+    // FUNCTIONS - START LOTTERY FUNCTIONS
     //======================
 
     // let contract administrator create a new Lottery.
@@ -115,7 +115,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         returns (bool, bool, uint256)
     {
         require(lotStarted == false, "Already started");
-        require(msg.value == 0.01 ether, "Send 0.01 ETH to buy ticket");
+        require(msg.value == 0.01 ether, "Send 0.01 ETH to buy out the first ticket");
         if (_maxTicketAmountOption == 0) lotMaxNonce = 10;
         else if (_maxTicketAmountOption == 1) lotMaxNonce = 100;
         else if (_maxTicketAmountOption == 2) lotMaxNonce = 1000;
@@ -126,6 +126,26 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         (bool ticketBought_, uint256 lotNonce_) = buyTicket_();
         return (lotStarted, ticketBought_, lotNonce_);
     }
+
+    // internal versoin of buy ticket so lottery owner can buy out the first ticket with the lottery deployment.
+    function buyTicket_() internal returns (bool, uint256) {
+        require(lotStarted == true, "Not started yet");
+        require(lotFinished == false, "Already finished");
+        lotTicketsMapping[lotNonce] = msg.sender;
+        lotNonce++;
+        lotRewards += 0.008 ether; // only 80% of ticket price is written down - other goes to comissions.
+        bool ticketBought_ = true;
+        if (lotMaxNonce == lotNonce) {
+            lotFinished = true;
+            return (ticketBought_, lotNonce);
+        } else {
+            return (ticketBought_, lotNonce);
+        }
+    }
+
+    //======================
+    // FUNCTIONS - LOTTERY IS LIVE
+    //======================
 
     // the function that allows user to participate in the lottery
     // user can buy any amount of tickets, increasing the chances to win accordingly.
@@ -145,56 +165,9 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         }
     }
 
-    // internal versoin of buy ticket so lottery owner can buy out the first ticket with the lottery deployment.
-    function buyTicket_() internal returns (bool, uint256) {
-        require(lotStarted == true, "Not started yet");
-        require(lotFinished == false, "Already finished");
-        lotTicketsMapping[lotNonce] = msg.sender;
-        lotNonce++;
-        lotRewards += 0.008 ether; // only 80% of ticket price is written down - other goes to comissions.
-        bool ticketBought_ = true;
-        if (lotMaxNonce == lotNonce) {
-            lotFinished = true;
-            return (ticketBought_, lotNonce);
-        } else {
-            return (ticketBought_, lotNonce);
-        }
-    }
-
-    // after the random words are got, anyone can call this function
-    // once it's called, the winner is officially found and can withdraw the rewards.
-    function revealRandomWinner() public returns (uint256, address) {
-        require(lotRandomWordsRecieved == true, "No oracle answer yet");
-        uint256 s_randomWord_ = s_randomWords[1];
-        uint256 result_;
-        if (lotNonce == 10) result_ = s_randomWord_ % 10;
-        else if (lotNonce == 100) result_ = s_randomWord_ % 100;
-        else if (lotNonce == 1000) result_ = s_randomWord_ % 1000;
-        else result_ = s_randomWord_ % 10000;
-        lotWinner = lotTicketsMapping[result_];
-        return (result_, lotWinner);
-    }
-
-    // Use it to help your friend receive their lottery prizes!
-    // or release it on your own if you are the lucky one!
-    // also use it if you are the greedy admin that wants your comissions to be unlocked
-    // after winner takes their part.
-    function releaseRewards() public {
-        require(lotRewardsReleased == false, "No rewards");
-        (bool sent,) = lotWinner.call{value: lotRewards}("");
-        require(sent, "Failed to send Ether");
-    }
-
-    // as soon as winners rewards released, owner takes the request.
-    // the machanism to take EVERYBTHING ELSE not the written down sum is
-    // designed also to work if chainlink orcale is switched to self-sponsored machamism
-    // in this case, this comission will be first used to pay for orcale call
-    // and only then the owner can take the rest
-    function releaseComissions() public onlyOwner {
-        require(lotRewardsReleased == true, "Release rewards first");
-        (bool sent,) = msg.sender.call{value: address(this).balance}("");
-        require(sent, "Failed to send Ether");
-    }
+    //======================
+    // FUNCTIONS - LOTTERY IS ENDED
+    //======================
 
     // @notice Requests randomness
     // Assumes the subscription is funded sufficiently; "Words" refers to unit of data in Computer Science
@@ -231,5 +204,40 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         s_randomWords = randomWords;
         emit ReturnedRandomness(randomWords);
         lotRandomWordsRecieved = true;
+    }
+
+    // after the random words are got, anyone can call this function
+    // once it's called, the winner is officially found and can withdraw the rewards.
+    function revealRandomWinner() public returns (uint256, address) {
+        require(lotRandomWordsRecieved == true, "No oracle answer yet");
+        uint256 s_randomWord_ = s_randomWords[1];
+        uint256 result_;
+        if (lotNonce == 10) result_ = s_randomWord_ % 10;
+        else if (lotNonce == 100) result_ = s_randomWord_ % 100;
+        else if (lotNonce == 1000) result_ = s_randomWord_ % 1000;
+        else result_ = s_randomWord_ % 10000;
+        lotWinner = lotTicketsMapping[result_];
+        return (result_, lotWinner);
+    }
+
+    // Use it to help your friend receive their lottery prizes!
+    // or release it on your own if you are the lucky one!
+    // also use it if you are the greedy admin that wants your comissions to be unlocked
+    // after winner takes their part.
+    function releaseRewards() public {
+        require(lotRewardsReleased == false, "No rewards");
+        (bool sent,) = lotWinner.call{value: lotRewards}("");
+        require(sent, "Failed to send Ether");
+    }
+
+    // as soon as winners rewards released, owner takes the request.
+    // the machanism to take EVERYBTHING ELSE not the written down sum is
+    // designed also to work if chainlink orcale is switched to self-sponsored machamism
+    // in this case, this comission will be first used to pay for orcale call
+    // and only then the owner can take the rest
+    function releaseComissions() public onlyOwner {
+        require(lotRewardsReleased == true, "Release rewards first");
+        (bool sent,) = msg.sender.call{value: address(this).balance}("");
+        require(sent, "Failed to send Ether");
     }
 }

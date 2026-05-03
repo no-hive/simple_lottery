@@ -25,7 +25,15 @@ contract LotteryTest is Test {
     uint96 immutable _GASPRICELINK = 1000000000;
     int256 immutable _WEIPERUNITLINK = 3984445400000000;
 
+    address OWNER = address(1);
+
     function setUp() public {
+        // we create mock OWNER to check that
+        // 1. first ticket is really bought out by OWNER
+        // 2.Only Owner Functions can be called only by initial OWNER
+        vm.deal(OWNER, 1 ether);
+        vm.startPrank(OWNER);
+
         vRFCoordinatorV2_5Mock = new VRFCoordinatorV2_5Mock(_BASEFEE, _GASPRICELINK, _WEIPERUNITLINK);
 
         address VRFCoordinatorV2_5Mock_address = address(vRFCoordinatorV2_5Mock);
@@ -39,6 +47,8 @@ contract LotteryTest is Test {
         address SimpleLottery_address = address(simpleLottery);
 
         vRFCoordinatorV2_5Mock.addConsumer(DEFAULT_SUBSCRIBTION_ID, SimpleLottery_address);
+
+        vm.stopPrank();
     }
 
     function testSetUpFunctionSubId() public {
@@ -53,14 +63,16 @@ contract LotteryTest is Test {
     }
 
     function testLotteryInitialization() public {
+        vm.startPrank(OWNER);
         simpleLottery.createAndStartLottery{value: 0.01 ether}(TEST_NAME, TEST_MAX_CAP);
         assertEq(simpleLottery.lotNonce(), 1);
         assertEq(simpleLottery.lotMaxNonce(), 10);
         assertEq(simpleLottery.lotRewards(), 0.008 ether);
         uint256 balance = address(simpleLottery).balance;
         assertEq(balance, 0.01 ether);
-        //       address first_owner = simpleLottery.lotTicketsMapping1);
-        //       assertEq(first_owner, simpleLottery.s_pendingOwner);
+        address first_owner = simpleLottery.lotTicketsMapping(0);
+        assertEq(first_owner, OWNER);
+        vm.stopPrank();
     }
 }
 
