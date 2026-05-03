@@ -8,6 +8,13 @@ import {VRFV2PlusClient} from "lib/chainlink-evm/contracts/src/v0.8/vrf/dev/libr
 
 contract SimpleLottery is VRFConsumerBaseV2Plus {
     //======================
+    // EVENTS
+    //======================
+
+    // event emitted after random words are sent back by chainlink.
+    event ReturnedRandomness(uint256[] randomWords);
+
+    //======================
     // NO MAGICAL NUMBERS
     //======================
 
@@ -15,19 +22,8 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     uint256 public constant PRIZE_POOL_SHARE = 8e15; // 0.008 ether
 
     //======================
-    // LOTTERY VARIABLES
+    // LOTTERY VARIABLES - BOOLEAN STATUSES
     //======================
-
-    // @notice Identifier name of the lottery. Serves as a simple identifier for user or frontend.
-    // @dev Not used in any functions beside the lottery initialisation.
-    string public lotName;
-
-    // Maximum number of tickets available in the lottery
-    // Always will be 10, 100, 1000 or 10000. - the lottery owner does not
-    // inout ramdon number - the lottery owner just choose between these options via
-    // uint8 input where 0 -, 1 - , 2 - , 3-
-    // chec function to understand how it works.
-    uint256 public lotMaxNonce;
 
     // @notice Indicates whether the lottery has started.
     // Becomes true as lottery admin initizlese the lottery via special function.
@@ -46,6 +42,18 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // @notice Indicates whether rewards have been paid out.
     bool public lotRewardsReleased;
 
+    //======================
+    // LOTTERY VARIABLES - LOTTERY DATA
+    //======================
+
+    // @notice Identifier name of the lottery. Serves as a simple identifier for user or frontend.
+    // @dev Not used in any functions beside the lottery initialisation.
+    string public lotName;
+
+    // Maximum number of tickets available in the lottery
+    // Always will be 10, 100, 1000 or 10000.
+    uint256 public lotMaxNonce;
+
     // @notice The lottery winner address.
     address public lotWinner;
 
@@ -61,7 +69,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     uint256 public lotRewards;
 
     //======================
-    // RANDOMNESS VARIABLES
+    // RANDOMNESS CONSTANTS
     //======================
 
     // @notice Chainlink VRF subscription ID.
@@ -71,13 +79,17 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     bytes32 public immutable s_keyHash;
 
     // @notice Gas limit for VRF callback.
-    uint32 constant CALLBACK_GAS_LIMIT = 100_000;
+    uint32 constant CALLBACK_GAS_LIMIT = 1e5;
 
     // @notice Number of confirmations before VRF response.
     uint16 constant REQUEST_CONFIRMATIONS = 3;
 
     // @notice Number of random words requested.
     uint32 constant NUM_WORDS = 1;
+
+    //======================
+    // RANDOMNESS VARIABLES
+    //======================
 
     //Last received random words.
     // used to calculate the winner ticket id.
@@ -90,11 +102,8 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     uint256 public s_requestId;
 
     //======================
-    // EVENTS
+    // CONSTRUCTOR
     //======================
-
-    // event emitted after random words are sent back by chainlink.
-    event ReturnedRandomness(uint256[] randomWords);
 
     // @notice Constructor inherits VRFConsumerBaseV2Plus.
     // @param subscriptionId - the subscription ID that this contract uses for funding requests.
@@ -118,7 +127,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         returns (bool, bool, uint256)
     {
         require(!lotStarted, "Already started");
-        require(msg.value == 0.01 ether, "Send 0.01 ETH to buy out the first ticket");
+        require(msg.value == TICKET_PRICE, "Send 0.01 ETH to buy out the first ticket");
         if (_maxTicketAmountOption == 0) lotMaxNonce = 10;
         else if (_maxTicketAmountOption == 1) lotMaxNonce = 100;
         else if (_maxTicketAmountOption == 2) lotMaxNonce = 1000;
@@ -136,7 +145,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         require(!lotFinished, "Already finished");
         lotTicketsMapping[lotNonce] = msg.sender;
         lotNonce++;
-        lotRewards += 0.008 ether; // only 80% of ticket price is written down - other goes to comissions.
+        lotRewards += PRIZE_POOL_SHARE; // only 80% of ticket price is written down - other goes to comissions.
         bool ticketBought_ = true;
         if (lotMaxNonce == lotNonce) {
             lotFinished = true;
@@ -155,10 +164,10 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     function buyTicket() public payable returns (bool, uint256) {
         require(lotStarted, "Not started yet");
         require(!lotFinished, "Already finished");
-        require(msg.value == 0.01 ether, "Send 0.01 ETH to buy ticket");
+        require(msg.value == TICKET_PRICE, "Send 0.01 ETH to buy ticket");
         lotTicketsMapping[lotNonce] = msg.sender;
         lotNonce++;
-        lotRewards += 0.008 ether; // only 80% of ticket price is written down - other goes to comissions.
+        lotRewards += PRIZE_POOL_SHARE; // only 80% of ticket price is written down - other goes to comissions.
         bool ticketBought_ = true;
         if (lotMaxNonce == lotNonce) {
             lotFinished = true;
@@ -169,7 +178,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     }
 
     //======================
-    // FUNCTIONS - LOTTERY IS ENDED
+    // FUNCTIONS - FIND THE WINNER
     //======================
 
     // @notice Requests randomness
@@ -222,6 +231,10 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         lotWinner = lotTicketsMapping[result_];
         return (result_, lotWinner);
     }
+
+    //======================
+    // FUNCTIONS - MANAGE CONTRACT POST_LOTTERY BALANCE
+    //======================
 
     // Use it to help your friend receive their lottery prizes!
     // or release it on your own if you are the lucky one!
