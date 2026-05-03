@@ -5,6 +5,10 @@ import {VRFConsumerBaseV2Plus} from "lib/chainlink-evm/contracts/src/v0.8/vrf/de
 import {VRFV2PlusClient} from "lib/chainlink-evm/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 
 contract SimpleLottery is VRFConsumerBaseV2Plus {
+    //======================
+    // LOTTERY VARIABLES
+    //======================
+
     // @notice Identifier name of the lottery.
     // lottery name. serves as a simple identifier for user.
     // @dev Not used in any functions beside the lottery initialisation.
@@ -51,6 +55,11 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
 
     // @notice the Rewards the winner can withdraw once lottery is ended and winner is found.
     // @dev sum updated in __ function each time someone buys a ticket.
+
+    //======================
+    // RANDOMNESS VARIABLES
+    //======================
+
     uint256 public lotRewards;
 
     // Your subscription ID.
@@ -109,7 +118,6 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         (bool ticketBought_, uint256 lotNonce_) = buyTicket();
         return (lotStarted, ticketBought_, lotNonce_);
     }
-    
 
     // the function that allows user to participate in the lottery
     // user can buy any amount of tickets, increasing the chances to win accordingly.
@@ -200,5 +208,4 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         emit ReturnedRandomness(randomWords);
         lotRandomWordsRecieved = true;
     }
-
 }

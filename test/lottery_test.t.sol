@@ -41,10 +41,8 @@ contract LotteryTest is Test {
         vRFCoordinatorV2_5Mock.addConsumer(DEFAULT_SUBSCRIBTION_ID, SimpleLottery_address);
     }
 
-    function testSetUpFunctionSubId () public  {
-
-       assertEq(simpleLottery.s_subscriptionId(),  DEFAULT_SUBSCRIBTION_ID); 
-
+    function testSetUpFunctionSubId() public {
+        assertEq(simpleLottery.s_subscriptionId(), DEFAULT_SUBSCRIBTION_ID);
     }
 
     // 1. need to check if deploy runs correctly
@@ -61,8 +59,8 @@ contract LotteryTest is Test {
         assertEq(simpleLottery.lotRewards(), 0.008 ether);
         uint256 balance = address(simpleLottery).balance;
         assertEq(balance, 0.01 ether);
- //       address first_owner = simpleLottery.lotTicketsMapping1);
- //       assertEq(first_owner, simpleLottery.s_pendingOwner);
+        //       address first_owner = simpleLottery.lotTicketsMapping1);
+        //       assertEq(first_owner, simpleLottery.s_pendingOwner);
     }
 }
 
