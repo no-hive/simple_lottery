@@ -86,6 +86,10 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // latest request ID
     uint256 public s_requestId;
 
+    //======================
+    // EVENTS
+    //======================
+
     // event emitted after random words are sent back by chainlink
     event ReturnedRandomness(uint256[] randomWords);
 
@@ -97,6 +101,10 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         s_keyHash = keyHash;
         s_subscriptionId = subscriptionId;
     }
+
+    //======================
+    // FUNCTION
+    //======================
 
     // let contract administrator create a new Lottery.
     // to start a lottery admin als oneeds to buy out the very first ticket.
@@ -115,7 +123,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         lotName = _name;
         lotNonce = 0;
         lotStarted = true;
-        (bool ticketBought_, uint256 lotNonce_) = buyTicket();
+        (bool ticketBought_, uint256 lotNonce_) = buyTicket_();
         return (lotStarted, ticketBought_, lotNonce_);
     }
 
@@ -125,6 +133,22 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         require(lotStarted == true, "Not started yet");
         require(lotFinished == false, "Already finished");
         require(msg.value == 0.01 ether, "Send 0.01 ETH to buy ticket");
+        lotTicketsMapping[lotNonce] = msg.sender;
+        lotNonce++;
+        lotRewards += 0.008 ether; // only 80% of ticket price is written down - other goes to comissions.
+        bool ticketBought_ = true;
+        if (lotMaxNonce == lotNonce) {
+            lotFinished = true;
+            return (ticketBought_, lotNonce);
+        } else {
+            return (ticketBought_, lotNonce);
+        }
+    }
+
+    // internal versoin of buy ticket so lottery owner can buy out the first ticket with the lottery deployment.
+    function buyTicket_() internal returns (bool, uint256) {
+        require(lotStarted == true, "Not started yet");
+        require(lotFinished == false, "Already finished");
         lotTicketsMapping[lotNonce] = msg.sender;
         lotNonce++;
         lotRewards += 0.008 ether; // only 80% of ticket price is written down - other goes to comissions.
