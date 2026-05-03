@@ -38,6 +38,7 @@ contract LotteryTest is Test {
 
         address VRFCoordinatorV2_5Mock_address = address(vRFCoordinatorV2_5Mock);
 
+        // there is a mistake here.
         DEFAULT_SUBSCRIBTION_ID = vRFCoordinatorV2_5Mock.createSubscription();
 
         vRFCoordinatorV2_5Mock.fundSubscription(DEFAULT_SUBSCRIBTION_ID, 100000000000000000000);

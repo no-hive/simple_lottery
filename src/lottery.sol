@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
+// we need both these imports for access to Chainlink VRF true randomness
+// that is defintely essential to have a fair on-chain lottery mechanism.
 import {VRFConsumerBaseV2Plus} from "lib/chainlink-evm/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
 import {VRFV2PlusClient} from "lib/chainlink-evm/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 
@@ -9,94 +11,88 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // LOTTERY VARIABLES
     //======================
 
-    // @notice Identifier name of the lottery.
-    // lottery name. serves as a simple identifier for user.
+    // @notice Identifier name of the lottery. Serves as a simple identifier for user or frontend.
     // @dev Not used in any functions beside the lottery initialisation.
     string public lotName;
 
-    // the max amount of tickets to be bought;
+    // Maximum number of tickets available in the lottery
+    // Always will be 10, 100, 1000 or 10000. - the lottery owner does not
+    // inout ramdon number - the lottery owner just choose between these options via
+    // uint8 input where 0 -, 1 - , 2 - , 3-
+    // chec function to understand how it works.
     uint256 public lotMaxNonce;
 
-    // @notice Indicates whether lottery has started
-    // @dev Updated in ___ function
+    // @notice Indicates whether the lottery has started.
+    // Becomes true as lottery admin initizlese the lottery via special function.
     bool public lotStarted;
 
-    // @notice Indicates whether lottery is finished
-    // @dev Updated in ___ function
+    // @notice Indicates whether all tickets are sold and lottery is finished.
+    // As soon as it is true, no more tickets can be bought and post-lottery functionality is opened.
     bool public lotFinished;
 
-    // @notice Indicates whether VRF request was already made
-    // @dev Updated in ___ function
+    // @notice Indicates whether a randomness request has been sent to Chainlink VRF.
     bool public lotRandomWordsRequestMade;
 
-    // @notice Indicates whether Chainlink oracle has sent the random words back
-    // @dev Updated in __ function
+    // @notice Indicates whether random words have been received from Chainlink VRF.
     bool public lotRandomWordsRecieved;
 
-    // @notice Indicates whether rewards were already released
-    // @dev Updated in ___ function
+    // @notice Indicates whether rewards have been paid out.
     bool public lotRewardsReleased;
 
-    // @notice The lottery winner address. This address is only allowed to withdraw rewards.
-    // @dev Found out in two steps:
-    // 1.
-    // 2.
+    // @notice The lottery winner address.
     address public lotWinner;
 
-    // @notice the amount of tickets bout for lottery participation.
-    // @udev used at:
-    // 1.
-    // 2.
+    // @notice Total number of tickets sold.
     uint256 public lotNonce;
 
-    // @notice Mapping from ticket index to buyer address.
-    // @dev Ticket index = lotNonce in the moment of ticket purchase.
+    // @notice Mapping of ticket index to buyer address.
+    // @dev ticketId => buyer, where ticketId = curren lotNonce.
     mapping(uint256 => address) public lotTicketsMapping;
 
-    // @notice the Rewards the winner can withdraw once lottery is ended and winner is found.
-    // @dev sum updated in __ function each time someone buys a ticket.
+    // @notice Total reward pool available to the winner.
+    // @dev 80% of each ticket purchase is added here.
+    uint256 public lotRewards;
 
     //======================
     // RANDOMNESS VARIABLES
     //======================
 
-    uint256 public lotRewards;
-
-    // Your subscription ID.
+    // @notice Chainlink VRF subscription ID.
     uint256 public s_subscriptionId;
 
-    // The gas lane to use, which specifies the maximum gas price to bump to.
-    // For a list of available gas lanes on each network,
-    // see https://docs.chain.link/docs/vrf-contracts/#configurations
+    // @notice Gas lane key hash used for VRF requests.
     bytes32 public immutable s_keyHash;
 
-    // stores the limit of gas for random wordSs to be received.
+    // @notice Gas limit for VRF callback.
     uint32 constant CALLBACK_GAS_LIMIT = 100_000;
 
-    // The default is 3, but you can set this higher.
+    // @notice Number of confirmations before VRF response.
     uint16 constant REQUEST_CONFIRMATIONS = 3;
 
-    // For this example, retrieve 1 random values in one request.
-    // Cannot exceed VRFCoordinatorV2_5.MAX_NUM_WORDS.
+    // @notice Number of random words requested.
     uint32 constant NUM_WORDS = 1;
 
-    //latest random word
+    //Last received random words.
+    // used to calculate the winner ticket id.
     uint256[] public s_randomWords;
 
-    // latest request ID
+    // @notice Last VRF request ID
+    // considering this contract can be used only for one lottery,
+    // the very first VRF request will be always the last one,
+    // as after it the function call that updates this variable is blocked.
     uint256 public s_requestId;
 
     //======================
     // EVENTS
     //======================
 
-    // event emitted after random words are sent back by chainlink
+    // event emitted after random words are sent back by chainlink.
     event ReturnedRandomness(uint256[] randomWords);
 
-    // @notice Constructor inherits VRFConsumerBaseV2Plus
-    // @param subscriptionId - the subscription ID that this contract uses for funding requests
-    // @param vrfCoordinator - coordinator, check https://docs.chain.link/vrf/v2-5/supported-networks
-    // @param keyHash - the gas lane to use, which specifies the maximum gas price to bump to
+    // @notice Constructor inherits VRFConsumerBaseV2Plus.
+    // @param subscriptionId - the subscription ID that this contract uses for funding requests.
+    // @param vrfCoordinator - coordinator, check https://docs.chain.link/vrf/v2-5/supported-networks.
+    // @param keyHash - the gas lane to use, which specifies the maximum gas price to bump to.
     constructor(uint256 subscriptionId, address vrfCoordinator, bytes32 keyHash) VRFConsumerBaseV2Plus(vrfCoordinator) {
         s_keyHash = keyHash;
         s_subscriptionId = subscriptionId;
