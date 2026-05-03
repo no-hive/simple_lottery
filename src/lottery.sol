@@ -73,7 +73,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     //======================
 
     // @notice Chainlink VRF subscription ID.
-    uint256 public s_subscriptionId;
+    uint256 public immutable s_subscriptionId;
 
     // @notice Gas lane key hash used for VRF requests.
     bytes32 public immutable s_keyHash;
