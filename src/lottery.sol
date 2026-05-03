@@ -7,7 +7,17 @@ import {VRFConsumerBaseV2Plus} from "lib/chainlink-evm/contracts/src/v0.8/vrf/de
 import {VRFV2PlusClient} from "lib/chainlink-evm/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 
 contract SimpleLottery is VRFConsumerBaseV2Plus {
-    //
+    //======================
+    // ENUM
+    //======================
+
+    enum CapOption {
+        TEN,
+        HUNDRED,
+        THOUSAND,
+        TEN_THOUSAND
+    }
+
     //======================
     // EVENTS
     //======================
@@ -134,10 +144,10 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     {
         require(!lotStarted, "Already started");
         require(msg.value == TICKET_PRICE, "Send 0.01 ETH to buy out the first ticket");
-        if (_maxTicketAmountOption == 0) lotMaxNonce = 10;
-        else if (_maxTicketAmountOption == 1) lotMaxNonce = 100;
-        else if (_maxTicketAmountOption == 2) lotMaxNonce = 1000;
-        else lotMaxNonce = 10000;
+        if (_maxTicketAmountOption == 0) lotMaxNonce = CapOption.TEN;
+        else if (_maxTicketAmountOption == 1) lotMaxNonce = CapOption.HUNDRED;
+        else if (_maxTicketAmountOption == 2) lotMaxNonce = CapOption.THOUSAND;
+        else lotMaxNonce = CapOption.TEN_THOUSAND;
         lotName = _name;
         lotNonce = 0;
         lotStarted = true;
@@ -230,10 +240,10 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         require(lotRandomWordsRecieved, "No oracle answer yet");
         uint256 s_randomWord_ = s_randomWords[1];
         uint256 result_;
-        if (lotNonce == 10) result_ = s_randomWord_ % 10;
-        else if (lotNonce == 100) result_ = s_randomWord_ % 100;
-        else if (lotNonce == 1000) result_ = s_randomWord_ % 1000;
-        else result_ = s_randomWord_ % 10000;
+        if (lotNonce == CapOption.TEN) result_ = s_randomWord_ % CapOption.TEN;
+        else if (lotNonce == CapOption.HUNDRED) result_ = s_randomWord_ % CapOption.HUNDRED;
+        else if (lotNonce == CapOption.THOUSAND) result_ = s_randomWord_ % CapOption.THOUSAND;
+        else result_ = s_randomWord_ % CapOption.TEN_THOUSAND;
         lotWinner = lotTicketsMapping[result_];
         return (result_, lotWinner);
     }
