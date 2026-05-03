@@ -110,7 +110,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         onlyOwner
         returns (bool, bool, uint256)
     {
-        require(lotStarted == false, "Already started");
+        require(!lotStarted, "Already started");
         require(msg.value == 0.01 ether, "Send 0.01 ETH to buy out the first ticket");
         if (_maxTicketAmountOption == 0) lotMaxNonce = 10;
         else if (_maxTicketAmountOption == 1) lotMaxNonce = 100;
@@ -125,8 +125,8 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
 
     // internal versoin of buy ticket so lottery owner can buy out the first ticket with the lottery deployment.
     function buyTicket_() internal returns (bool, uint256) {
-        require(lotStarted == true, "Not started yet");
-        require(lotFinished == false, "Already finished");
+        require(lotStarted, "Not started yet");
+        require(!lotFinished, "Already finished");
         lotTicketsMapping[lotNonce] = msg.sender;
         lotNonce++;
         lotRewards += 0.008 ether; // only 80% of ticket price is written down - other goes to comissions.
@@ -146,8 +146,8 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // the function that allows user to participate in the lottery
     // user can buy any amount of tickets, increasing the chances to win accordingly.
     function buyTicket() public payable returns (bool, uint256) {
-        require(lotStarted == true, "Not started yet");
-        require(lotFinished == false, "Already finished");
+        require(lotStarted, "Not started yet");
+        require(!lotFinished, "Already finished");
         require(msg.value == 0.01 ether, "Send 0.01 ETH to buy ticket");
         lotTicketsMapping[lotNonce] = msg.sender;
         lotNonce++;
@@ -170,8 +170,8 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // as soon as lottery ends, anyone can initiate this function to run a chainlink request.
     // due to lotRandomWordsRequestMade this function can be run only once on the entire contract life cycle.
     function requestRandomWords() public {
-        require(lotFinished == true, "Not finished yet");
-        require(lotRandomWordsRequestMade == false, "Already requested");
+        require(lotFinished, "Not finished yet");
+        require(!lotRandomWordsRequestMade, "Already requested");
         lotRandomWordsRequestMade = true;
         // Will revert if subscription is not set and funded.
         s_requestId = s_vrfCoordinator.requestRandomWords(
@@ -205,7 +205,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // after the random words are got, anyone can call this function
     // once it's called, the winner is officially found and can withdraw the rewards.
     function revealRandomWinner() public returns (uint256, address) {
-        require(lotRandomWordsRecieved == true, "No oracle answer yet");
+        require(lotRandomWordsRecieved, "No oracle answer yet");
         uint256 s_randomWord_ = s_randomWords[1];
         uint256 result_;
         if (lotNonce == 10) result_ = s_randomWord_ % 10;
