@@ -29,7 +29,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // NO MAGICAL NUMBERS
     //======================
 
-    uint256[4] private caps = [10, 100, 1000, 10000];
+    uint256[4] private caps = [10, 1e2, 1e3, 1e4];
 
     uint256 public constant TICKET_PRICE = 1e16; // 0.01 ether
     uint256 public constant PRIZE_POOL_SHARE = 8e15; // 0.008 ether
