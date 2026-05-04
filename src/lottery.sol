@@ -12,13 +12,18 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // EVENTS
     //======================
 
-    // LotteryStarted ();
-    // NewTicketBought (ticket nonce)
-    // LotteryFinished ();
-    // event emitted after random words are sent back by chainlink.
+    //
+    event LotteryStarted();
+    //
+    event NewTicketBought(uint256 ticket_nonce);
+    //
+    event LotteryFinished();
+    // emitted after random words are sent back by chainlink.
     event ReturnedRandomness(uint256[] randomWords);
-    //RewardsReleased ();
-    //ComissionsReleased ();
+    //
+    event RewardsReleased();
+    //
+    event ComissionsReleased();
 
     //======================
     // NO MAGICAL NUMBERS
