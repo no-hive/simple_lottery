@@ -29,12 +29,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // NO MAGICAL NUMBERS
     //======================
 
-    enum CapOption {
-        TEN,
-        HUNDRED,
-        THOUSAND,
-        TEN_THOUSAND
-    }
+    uint256[4] private caps = [10, 100, 1000, 10000];
 
     uint256 public constant TICKET_PRICE = 1e16; // 0.01 ether
     uint256 public constant PRIZE_POOL_SHARE = 8e15; // 0.008 ether
@@ -71,6 +66,8 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     // Maximum number of tickets available in the lottery
     // Always will be 10, 100, 1000 or 10000.
     uint256 public lotMaxNonce;
+
+    uint8 public lotMaxNonceOption;
 
     // @notice The lottery winner address.
     address public lotWinner;
@@ -146,10 +143,8 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
     {
         require(!lotStarted, "Already started");
         require(msg.value == TICKET_PRICE, "Send 0.01 ETH to buy out the first ticket");
-        if (_maxTicketAmountOption == 0) lotMaxNonce = CapOption.TEN;
-        else if (_maxTicketAmountOption == 1) lotMaxNonce = CapOption.HUNDRED;
-        else if (_maxTicketAmountOption == 2) lotMaxNonce = CapOption.THOUSAND;
-        else lotMaxNonce = CapOption.TEN_THOUSAND;
+        lotMaxNonce = caps[_maxTicketAmountOption];
+        lotMaxNonceOption = _maxTicketAmountOption;
         lotName = _name;
         lotNonce = 0;
         lotStarted = true;
@@ -242,10 +237,7 @@ contract SimpleLottery is VRFConsumerBaseV2Plus {
         require(lotRandomWordsRecieved, "No oracle answer yet");
         uint256 s_randomWord_ = s_randomWords[1];
         uint256 result_;
-        if (lotNonce == CapOption.TEN) result_ = s_randomWord_ % CapOption.TEN;
-        else if (lotNonce == CapOption.HUNDRED) result_ = s_randomWord_ % CapOption.HUNDRED;
-        else if (lotNonce == CapOption.THOUSAND) result_ = s_randomWord_ % CapOption.THOUSAND;
-        else result_ = s_randomWord_ % CapOption.TEN_THOUSAND;
+        result_ = s_randomWord_ % caps[lotMaxNonceOption];
         lotWinner = lotTicketsMapping[result_];
         return (result_, lotWinner);
     }
