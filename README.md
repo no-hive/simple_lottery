@@ -1,7 +1,7 @@
 | ![License](https://img.shields.io/github/license/no-hive/simple_lottery?style=flat) |
 ![Last Commit](https://img.shields.io/github/last-commit/no-hive/simple_lottery?style=flat) |
 ![Commit Count](https://img.shields.io/github/commit-activity/t/no-hive/simple_lottery?style=flat) |
-![Tests](https://github.com/no-hive/simple_bridge/actions/workflows/tests.yml/badge.svg) |
+![Tests](https://github.com/no-hive/simple_lottery/actions/workflows/tests.yml/badge.svg) |
 
 ## Simple lottery smart contract with Chainlink vrf integrated.
 
