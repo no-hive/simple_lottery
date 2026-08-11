@@ -1,30 +1,33 @@
-| ![License](https://img.shields.io/github/license/no-hive/simple_lottery?style=flat) |
-![Last Commit](https://img.shields.io/github/last-commit/no-hive/simple_lottery?style=flat) |
-![Commit Count](https://img.shields.io/github/commit-activity/t/no-hive/simple_lottery?style=flat) |
-![Tests](https://github.com/no-hive/simple_lottery/actions/workflows/tests.yml/badge.svg) |
 
-## Simple lottery smart contract with Chainlink vrf integrated.
+![License](https://img.shields.io/github/license/no-hive/simple_lottery?style=flat) 
+![Last Commit](https://img.shields.io/github/last-commit/no-hive/simple_lottery?style=flat) 
+![Commit Count](https://img.shields.io/github/commit-activity/t/no-hive/simple_lottery?style=flat) 
+![Tests](https://github.com/no-hive/simple_lottery/actions/workflows/tests.yml/badge.svg) 
 
-**This project represents a smart contract that allows to launch a one-time simple lottery:** 
+## Simple lottery smart contract with Chainlink VRF integrated
 
-1. The contract owner starts the lottery buying out very first ticket.
+---
 
-2. Anyone can buy a ticket for 0.01 ETH once lottery is started.
+#### Use it to conduct a one-time lottery with really simple rules. Explore the functionality below:
 
-3. 0.008 from each purchase goes to the prize pool, and the rest goes to cover oracle fee and owner commissions.
+#### 🎟️ Starting & buying tickets
+1. The **contract owner** starts the lottery by purchasing the very first ticket.
+2. Once started, **anyone can buy a ticket** for `0.01 ETH`.
+3. Of each purchase, `0.008 ETH` goes to the **prize pool**; the rest covers the **oracle fee** and **owner commission**.
 
-4. The lottery ends when the maximum number of tickets reached.
+#### 🏁 Ending the lottery
+4. The lottery **ends** once the maximum number of tickets is sold.
+5. After that, **no new lottery** can be started through the same contract.
 
-5. As soon as the lottery ends, no more lotteries can be done through the same contract. 
-   
-6. Once ticket cap is reached, anyone can request the winner to be randomly chosen. 
+#### 🎲 Picking the winner
+6. Once the ticket cap is reached, **anyone can request** a randomly chosen winner.
+7. The contract (or the owner, via a Chainlink subscription) **pays the Chainlink VRF fee** to determine the winner.
 
-7. Contract (or contract owner via chainlink subscription) pays the Chainklink oracle fee to find the winner.
+#### 💰 Payouts
+8. The **winner** can withdraw the prize pool — or anyone can release it on their behalf.
+9. The **contract owner** can withdraw the earned commission (balance remaining after the prize pool is released).
 
-8. As soon as the lottery ends, no more lotteries can be done through the same contract. 
+---
 
-9. Winner can withdraw the prize pool, or anyone can release the prize for the winner.
-
-10. Contract owner can withdraw earned commission (the remaining balance after the prize pool is released).
-
-If you want to find the smart contract that allows anyone to start any number of lotteries in one contract with different outcomes, different prize pools, and different time limits - check [lottery_engine](https://github.com/no-hive/lottery_engine), another project of mine.
+> [!WARNING]
+> **This project is educational. Use it with real money only at your own risk.**
